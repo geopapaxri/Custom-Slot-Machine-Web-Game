@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mega Zetta's Slot - My first Slot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1a252f;
+      color: white;
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .slot-machine {
+      background-color: #2c3e50;
+      padding: 20px 30px;
+      border-radius: 15px;
+      display: inline-block;
+      box-shadow: 0px 10px 30px rgba(0,0,0,0.8);
+      max-width: 600px;
+      transition: box-shadow 0.5s ease; 
+    }
+
+    .bonus-mode {
+      box-shadow: 0px 10px 50px rgba(155, 89, 182, 0.8);
+      border: 2px solid #9b59b6;
+    }
+
+    .paytable-info {
+      background-color: #34495e; 
+      padding: 10px; 
+      border-radius: 8px; 
+      margin-bottom: 15px; 
+      font-size: 14px; 
+      border: 1px solid #7f8c8d;
+    }
+
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      background-color: #1e2b38;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border: 2px solid #34495e;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .hud-box {
+      background-color: #000;
+      padding: 5px 15px;
+      border-radius: 5px;
+      color: #2ecc71;
+    }
+    .win-box { color: #f1c40f; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 70px);
+      grid-template-rows: repeat(4, 70px);
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .box {
+      background-color: white;
+      border: 3px solid #f1c40f;
+      border-radius: 8px;
+      font-size: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: black;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .symbol {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .multiplier-sym {
+      background: radial-gradient(circle, #8e44ad, #9b59b6);
+      color: #fff;
+      border-radius: 50%;
+      width: 85%;
+      height: 85%;
+      font-size: 20px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 10px #9b59b6;
+      border: 2px solid #f1c40f;
+      text-shadow: 1px 1px 2px #000;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+    }
+
+    .bet-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      background-color: #34495e;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .bet-btn {
+      background-color: #e67e22;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 20px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .bet-btn:hover { background-color: #d35400; }
+    
+    .buy-bonus-btn {
+      padding: 10px 20px;
+      font-size: 18px;
+      background: linear-gradient(45deg, #8e44ad, #9b59b6); 
+      color: white;
+      border: 2px solid #f1c40f;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 0 #732d91;
+      text-shadow: 1px 1px 2px #000;
+      transition: background-color 0.3s;
+    }
+    .buy-bonus-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+
+    .spin-btn {
+      padding: 15px 50px;
+      font-size: 24px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      box-shadow: 0 4px 0 #219653;
+      transition: background-color 0.3s;
+    }
+    .spin-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+    
+    /* Όλα τα απενεργοποιημένα κουμπιά γίνονται γκρι */
+    .bet-btn:disabled,
+    .spin-btn:disabled, 
+    .buy-bonus-btn:disabled { 
+      background: #7f8c8d !important; 
+      box-shadow: 0 4px 0 #576574 !important; 
+      border-color: #576574 !important; 
+      color: #dcdde1 !important; 
+      cursor: not-allowed !important; 
+    }
+
+    .spinning { animation: rollDown 0.08s linear infinite; filter: blur(2px); }
+    @keyframes rollDown { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+    .pop { transform: scale(0); opacity: 0; }
+    .drop { animation: dropIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes dropIn { 0% { transform: translateY(-100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+
+    .winner-box {
+      background-color: #fff2cc;
+      border-color: #e74c3c;
+      box-shadow: inset 0 0 15px #e74c3c;
+      transform: scale(1.05);
+      z-index: 10;
+    }
+    
+    .scatter-win {
+      background-color: #f8c291;
+      border-color: #9b59b6;
+      box-shadow: 0 0 20px #9b59b6;
+      transform: scale(1.15) rotate(5deg);
+      z-index: 20;
+    }
+
+    .multiplier-win {
+      transform: scale(1.15);
+      box-shadow: 0 0 25px #f1c40f;
+      z-index: 30;
+      border-color: #8e44ad;
+      animation: pulse 0.5s infinite;
+    }
+    @keyframes pulse { 0% { transform: scale(1.05); } 50% { transform: scale(1.2); } 100% { transform: scale(1.05); } }
+
+    .retrigger-alert {
+      color: #ff9ff3 !important;
+      text-shadow: 0 0 15px #f368e0, 0 0 30px #f368e0 !important;
+      font-size: 26px !important;
+      animation: retriggerPulse 0.5s infinite alternate;
+    }
+    @keyframes retriggerPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+    /* POP-UP STYLES */
+    .popup-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+    }
+    .popup-overlay.show { opacity: 1; visibility: visible; }
+    .popup-content {
+      background: linear-gradient(135deg, #2c3e50, #1a252f); border: 4px solid #f1c40f;
+      padding: 40px 50px; border-radius: 20px; font-size: 30px; font-weight: bold;
+      text-align: center; transform: scale(0.5); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .popup-overlay.show .popup-content { transform: scale(1); }
+    .popup-error { border-color: #e74c3c; box-shadow: 0 0 50px #e74c3c; color: #ff7675; }
+    .popup-bonus { border-color: #9b59b6; box-shadow: 0 0 60px #9b59b6; color: #ff9ff3; text-shadow: 0 0 10px #f368e0; }
+    
+    .popup-buttons { margin-top: 25px; display: flex; justify-content: center; gap: 15px; }
+    .popup-btn { padding: 10px 20px; font-size: 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; transition: transform 0.2s; }
+    .popup-btn:active { transform: scale(0.95); }
+    .popup-btn-ok { background-color: #7f8c8d; }
+    .popup-btn-refresh { background-color: #27ae60; }
+ 
+ /* ΝΕΟ: Επαγγελματική Οθόνη Έναρξης */
+    .start-screen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #1e2b38, #10171e);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000; /* Πάνω από το παιχνίδι και τα popups */
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .start-screen h1 {
+      font-size: 50px;
+      color: #f1c40f;
+      text-shadow: 0px 5px 15px rgba(0,0,0,0.5);
+      margin-bottom: 5px;
+    }
+    .start-screen p {
+      font-size: 20px;
+      color: #bdc3c7;
+      margin-bottom: 30px;
+    }
+    .start-btn {
+      padding: 20px 60px;
+      font-size: 28px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 6px 0 #219653, 0 10px 20px rgba(0,0,0,0.5);
+      transition: transform 0.1s, background-color 0.2s;
+    }
+    .start-btn:hover { background-color: #2ecc71; }
+    .start-btn:active { transform: translateY(6px); box-shadow: 0 0px 0 transparent; }
+  /* ========================================= */
+    /* ΝΕΟ: MOBILE RESPONSIVE ΣΧΕΔΙΑΣΜΟΣ         */
+    /* ========================================= */
+    
+    /* Αποτροπή ζουμ στο διπλό "χτύπημα" στα κινητά */
+    button { touch-action: manipulation; }
+
+    @media (max-width: 600px) {
+      .slot-machine {
+        padding: 15px 10px;
+        width: 95%;
+        box-sizing: border-box;
+      }
+      
+      h1 { font-size: 24px; margin-top: 5px; }
+      
+      .paytable-info { 
+        font-size: 11px; 
+        padding: 8px; 
+      }
+      
+      /* Τα βάζουμε το ένα κάτω από το άλλο στο HUD */
+      .hud { 
+        font-size: 15px; 
+        flex-direction: column; 
+        gap: 10px; 
+        padding: 10px; 
+      }
+      
+      /* Το "μαγικό" κόλπο: Το μέγεθος των κουτιών πάει με το πλάτος της οθόνης (vw) */
+      .grid {
+        grid-template-columns: repeat(5, 16vw);
+        grid-template-rows: repeat(4, 16vw);
+        gap: 5px;
+      }
+      
+      /* Μικρότερα φρούτα και πιο λεπτό περίγραμμα */
+      .box { 
+        font-size: 7.5vw; 
+        border-width: 2px; 
+      }
+      
+      /* Μικρότερος κύκλος για τη βόμβα */
+      .multiplier-sym {
+        font-size: 4vw;
+      }
+      
+      .bet-controls { font-size: 16px; padding: 8px; }
+      #betDisplayUI { font-size: 16px !important; }
+      .bet-btn { width: 35px; height: 35px; font-size: 18px; }
+      
+      .buy-bonus-btn, .spin-btn { 
+        font-size: 18px; 
+        padding: 12px 15px; 
+      }
+      
+      #message { font-size: 15px; height: 40px; }
+      
+      /* Προσαρμογή Pop-up για μικρές οθόνες */
+      .popup-content { 
+        padding: 25px 20px; 
+        font-size: 20px; 
+        width: 85%; 
+      }
+      .popup-btn { font-size: 16px; padding: 8px 15px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="start-screen" id="startScreen">
+    <h1>Mega Zetta's Slot</h1>
+    <p>Καλώς ήλθατε στο πρώτο μου Φρουτάκι!</p>
+    <button class="start-btn" onclick="startGame()">ΕΝΑΡΞΗ ΠΑΙΧΝΙΔΙΟΥ</button>
+  </div>
+
+  <audio id="bgMusic" loop><source src="base-music.mp3" type="audio/mpeg"></audio>
+  <audio id="bonusMusic" loop><source src="bonus-music.mp3" type="audio/mpeg"></audio>
+
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup-content" id="popupContent">Μήνυμα!</div>
+  </div>
+
+  <div class="slot-machine" id="machineContainer">
+    
+    <h1>Mega Zetta's Slot</h1>
+
+    <div class="paytable-info">
+      <strong>🍭 BONUS SCATTER: Βρες 4 για 10 FREE SPINS (+5 στο Retrigger)</strong><br>
+      <strong style="color: #f1c40f;">💣 MULTIPLIER: Πέφτουν στα Free Spins (x2 έως x100)!</strong><br><br>
+      💎: 0.50 | 💰: 0.20 | 🔔: 0.10 | 🍀: 0.08 | 🍓: 0.06 <br>
+      🍇: 0.05 | 🍉: 0.04 | 🍊: 0.03 | 🍋: 0.02 | 🍒: 0.01
+    </div>
+
+    <div class="hud">
+      <div>Υπόλοιπο: <span class="hud-box" id="balanceDisplay">100.00€</span></div>
+      <div>Κέρδος Γύρου: <span class="hud-box win-box" id="winDisplay">0.00€</span></div>
+    </div>
+    
+    <div class="grid" id="slotGrid"></div>
+
+    <div class="bet-controls">
+      <button class="bet-btn" id="btnMinus" onclick="changeBet(-1)">-</button>
+      <span style="font-size: 20px; font-weight: bold;" id="betDisplayUI">Ποντάρισμα: 1.50€</span>
+      <button class="bet-btn" id="btnPlus" onclick="changeBet(1)">+</button>
+    </div>
+
+    <button class="buy-bonus-btn" onclick="buyBonus()" id="buyBonusButton">🍭 ΑΓΟΡΑ BONUS (20.00€) 🍭</button>
+    <button class="spin-btn" onclick="spin()" id="spinButton">SPIN</button>
+    
+    <h2 id="message" style="height: 30px;">Έτοιμος; 🍭</h2>
+  </div>
+
+  <script>
+    // --- ΚΙΝΗΤΗΡΑΣ ΗΧΩΝ (Retro 8-bit) ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    function playTone(freq, type, duration, vol=0.1) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + duration);
+    }
+    function playPopSound() { playTone(400, 'square', 0.1, 0.05); } 
+    function playCoinSound() { playTone(987.77, 'sine', 0.1, 0.1); setTimeout(() => playTone(1318.51, 'sine', 0.3, 0.1), 100); }
+    function playBonusSound() { let t = 0; [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach(freq => { setTimeout(() => playTone(freq, 'square', 0.2, 0.1), t); t += 100; }); }
+
+    const bgMusic = document.getElementById('bgMusic');
+    const bonusMusic = document.getElementById('bonusMusic');
+    if (bgMusic) bgMusic.volume = 0.2; 
+    if (bonusMusic) bonusMusic.volume = 0.3;
+    let isMusicPlaying = false; 
+
+    // --- POPUP ΣΥΣΤΗΜΑ ---
+    function showPopup(text, type, duration, showButtons = false) {
+      const overlay = document.getElementById('popupOverlay');
+      const content = document.getElementById('popupContent');
+      if (window.popupTimeout) clearTimeout(window.popupTimeout);
+      
+      if (showButtons) {
+        content.innerHTML = `<div>${text}</div><div class="popup-buttons"><button class="popup-btn popup-btn-ok" onclick="closePopup()">ΟΚ</button><button class="popup-btn popup-btn-refresh" onclick="resetGame()">Ανανέωση (100€)</button></div>`;
+      } else {
+        content.innerHTML = text; 
+      }
+      content.className = 'popup-content'; 
+      if (type === 'bonus') content.classList.add('popup-bonus');
+      if (type === 'error') content.classList.add('popup-error');
+      
+      overlay.classList.add('show');
+      if (duration > 0) { window.popupTimeout = setTimeout(() => { closePopup(); }, duration); }
+    }
+    function closePopup() { document.getElementById('popupOverlay').classList.remove('show'); }
+    
+    function resetGame() {
+      balance = 100.00; roundWin = 0.00; currentSpinWin = 0.00; freeSpins = 0; inBonusRound = false;
+      updateUI(); closePopup();
+      document.getElementById('message').innerText = "Ο Κουμπαράς γέμισε ξανά! Καλή τύχη! 🍀";
+    }
+
+    // --- ΜΕΤΑΒΛΗΤΕΣ ΠΑΙΧΝΙΔΙΟΥ ---
+    let balance = 100.00; 
+    let roundWin = 0.00; 
+    let currentSpinWin = 0.00; 
+    
+    const validBets = [0.20, 0.30, 0.50, 1.00, 1.50, 2.00, 5.00, 7.00, 10.00, 20.00];
+    let currentBetIndex = 4; 
+    let betAmount = validBets[currentBetIndex];
+
+    let freeSpins = 0;
+    let inBonusRound = false; 
+
+    const payTable = {
+      '🍭': 1.00, '💎': 0.50, '💰': 0.20, '🔔': 0.10, '🍀': 0.08, '🍓': 0.06, 
+      '🍇': 0.05, '🍉': 0.04, '🍊': 0.03, '🍋': 0.02, '🍒': 0.01
+    };
+    
+    const weightConfig = {
+      '🍒': 18, '🍋': 15, '🍊': 13, '🍉': 11, '🍇': 10, '🍓': 8, '🍀': 7, '🔔': 6, '💰': 5, '💎': 4, '🍭': 3 
+    };
+
+    const weightedSymbols = [];
+    for (let sym in weightConfig) { for (let i = 0; i < weightConfig[sym]; i++) { weightedSymbols.push(sym); } }
+
+    const cols = 5; const rows = 4; const totalBoxes = cols * rows; 
+    const minToWin = 5; const minScatter = 4; 
+    
+    const gridElement = document.getElementById('slotGrid');
+    const boxElements = []; const symElements = [];
+    let currentGrid = []; let isSpinning = false;
+
+    function setSymbolAppearance(symEl, text) {
+      symEl.innerText = text;
+      if (text.startsWith('✖')) { symEl.classList.add('multiplier-sym'); } 
+      else { symEl.classList.remove('multiplier-sym'); }
+    }
+
+    function updateUI() {
+      document.getElementById('balanceDisplay').innerText = balance.toFixed(2) + "€";
+      document.getElementById('winDisplay').innerText = roundWin.toFixed(2) + "€";
+      document.getElementById('betDisplayUI').innerText = "Ποντάρισμα: " + betAmount.toFixed(2) + "€";
+      
+      const btnMinus = document.getElementById('btnMinus');
+      const btnPlus = document.getElementById('btnPlus');
+      const spinBtn = document.getElementById('spinButton');
+      const buyBtn = document.getElementById('buyBonusButton');
+      const machine = document.getElementById('machineContainer');
+
+      if (freeSpins > 0) {
+        btnMinus.disabled = true; btnPlus.disabled = true;
+        spinBtn.innerText = `FREE SPIN (${freeSpins} υπολείπονται)`;
+        spinBtn.style.backgroundColor = '#9b59b6'; spinBtn.style.boxShadow = '0 4px 0 #8e44ad';
+        machine.classList.add('bonus-mode');
+      } else {
+        btnMinus.disabled = (currentBetIndex === 0) || isSpinning;
+        btnPlus.disabled = (currentBetIndex === validBets.length - 1) || isSpinning;
+        if (!isSpinning) {
+          spinBtn.innerText = "SPIN";
+          spinBtn.style.backgroundColor = '#27ae60'; spinBtn.style.boxShadow = '0 4px 0 #219653';
+          machine.classList.remove('bonus-mode');
+        }
+      }
+      
+      if (buyBtn) buyBtn.disabled = (freeSpins > 0) || isSpinning || (balance < 20.00);
+    }
+
+    function changeBet(step) {
+      if (isSpinning || freeSpins > 0) return;
+      currentBetIndex += step;
+      if (currentBetIndex < 0) currentBetIndex = 0;
+      if (currentBetIndex >= validBets.length) currentBetIndex = validBets.length - 1;
+      betAmount = validBets[currentBetIndex]; updateUI();
+    }
+
+function getRandomSymbol(currentBoardArray) {
+      // 1. Μειώνουμε την πιθανότητα να σκάσει βόμβα στο 1.5% (0.015)
+      if (inBonusRound && Math.random() < 0.015) {
+        // 2. "Πνίγουμε" το 50 και το 100. Τώρα η σακούλα έχει 25 μπαλάκια!
+        const mults = [
+          2, 2, 2, 2, 2, 2, 
+          3, 3, 3, 3, 3, 
+          4, 4, 4, 
+          5, 5, 5, 
+          8, 8, 
+          10, 10, 
+          15, 25, 50, 100
+        ];
+        return '✖' + mults[Math.floor(Math.random() * mults.length)];
+      }
+      
+      let sym; let safetyCount = 0;
+      do { 
+        sym = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)]; 
+        safetyCount++; 
+      } 
+      while (sym === '🍭' && countScatters(currentBoardArray) >= 4 && safetyCount < 10);
+      return sym;
+    }
+
+
+    function countScatters(arr) { if (!arr) return 0; return arr.filter(s => s === '🍭').length; }
+
+    for (let i = 0; i < totalBoxes; i++) {
+      let box = document.createElement('div'); box.className = 'box';
+      let sym = document.createElement('div'); sym.className = 'symbol';
+      let randomSym = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
+      setSymbolAppearance(sym, randomSym); currentGrid.push(randomSym);
+      symElements.push(sym); boxElements.push(box); box.appendChild(sym); gridElement.appendChild(box);
+    }
+    updateUI(); 
+
+    function buyBonus() {
+      if (isSpinning || freeSpins > 0) return;
+      
+      const bonusCost = 20.00;
+      if (balance < bonusCost) { 
+        showPopup("❌ Χρειάζεσαι 20.00€ για την Αγορά! ❌", "error", 0, true); 
+        return; 
+      }
+
+      // 1. ΣΙΓΟΥΡΗ ΑΛΛΑΓΗ ΜΟΥΣΙΚΗΣ
+      if (bgMusic) bgMusic.pause(); // Κλείνουμε τη χαλαρή (αν έπαιζε)
+      if (bonusMusic) {
+        bonusMusic.currentTime = 0; 
+        bonusMusic.play().catch(e => console.log(e)); // Βάζουμε την επική!
+      }
+      playBonusSound();
+
+      // 2. ΠΛΗΡΩΜΗ ΚΑΙ ΡΥΘΜΙΣΕΙΣ
+      balance -= bonusCost; 
+      roundWin = 0; 
+      currentSpinWin = 0;
+      freeSpins = 11; 
+      inBonusRound = true; // ΤΟ ΠΙΟ ΣΗΜΑΝΤΙΚΟ: Δηλώνουμε ότι μπήκαμε Bonus
+      
+      updateUI(); 
+      document.getElementById('message').innerText = "🍭 ΑΓΟΡΑΣΕΣ ΤΟ BONUS! ΦΥΓΑΜΕ! 🍭";
+      document.getElementById('buyBonusButton').disabled = true;
+      
+      setTimeout(() => { spin(); }, 1000);
+    }
+
+    function spin() {
+      if (isSpinning) return; 
+      
+      // Ήχος κλικ κουμπιού
+      if (audioCtx.state === 'suspended') audioCtx.resume(); 
+      playTone(300, 'triangle', 0.1, 0.05);
+      
+      currentSpinWin = 0; 
+
+      if (freeSpins === 0) {
+        if (balance < betAmount) { 
+          showPopup("❌ Ανεπαρκές Υπόλοιπο! ❌", "error", 0, true); 
+          document.getElementById('message').innerText = "Ανεπαρκές Υπόλοιπο!"; 
+          return; 
+        }
+        balance -= betAmount; 
+        roundWin = 0; 
+        inBonusRound = false; 
+      } else {
+        freeSpins--; 
+        inBonusRound = true; 
+      }
+
+      isSpinning = true; 
+      updateUI(); 
+
+      const message = document.getElementById('message');
+      message.innerText = freeSpins > 0 ? "Μαγική Περιστροφή... ✨" : "Καλή τύχη... 🌪️";
+      message.classList.remove('retrigger-alert');
+
+      boxElements.forEach(box => { box.classList.remove('winner-box', 'scatter-win', 'multiplier-win'); });
+      symElements.forEach(sym => { sym.classList.remove('pop', 'drop', 'multiplier-sym'); sym.classList.add('spinning'); });
+
+      const interval = setInterval(() => { 
+        symElements.forEach(sym => { sym.innerText = weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)]; }); 
+      }, 80);
+
+      setTimeout(() => {
+        clearInterval(interval); 
+        currentGrid = []; 
+        symElements.forEach((sym, index) => {
+          sym.classList.remove('spinning');
+          let finalSym = getRandomSymbol(currentGrid); 
+          setSymbolAppearance(sym, finalSym); 
+          currentGrid[index] = finalSym;
+        });
+        evaluateBoard();
+      }, 1000);
+    }
+
+    function evaluateBoard() {
+      const message = document.getElementById('message');
+      let symbolCounts = {};
+      
+      currentGrid.forEach(sym => { if (!sym.startsWith('✖')) { symbolCounts[sym] = (symbolCounts[sym] || 0) + 1; } });
+
+      let winningSymbols = []; let isBonusTriggeredNow = false; 
+
+      if (symbolCounts['🍭'] >= minScatter) {
+        winningSymbols.push('🍭'); isBonusTriggeredNow = true; 
+      } else {
+        for (let sym in symbolCounts) { if (sym !== '🍭' && symbolCounts[sym] >= minToWin) { winningSymbols.push(sym); } }
+      }
+
+      if (winningSymbols.length === 0) {
+        if (inBonusRound && currentSpinWin > 0) {
+          let totalMult = 0; let bombIndices = [];
+          currentGrid.forEach((sym, index) => { if (sym.startsWith('✖')) { totalMult += parseInt(sym.substring(1)); bombIndices.push(index); } });
+
+          if (totalMult > 1) {
+            let bonusExtraWin = (currentSpinWin * totalMult) - currentSpinWin;
+            roundWin += bonusExtraWin; balance += bonusExtraWin; updateUI();
+            
+            message.innerText = `💣 MULTIPLIER x${totalMult}! Κέρδος Γύρου: ${(currentSpinWin * totalMult).toFixed(2)}€ 💣`;
+            message.style.color = '#f1c40f'; 
+            bombIndices.forEach(i => boxElements[i].classList.add('multiplier-win'));
+            
+            setTimeout(() => { message.style.color = 'white'; endSpinSequence(); }, 2500);
+            return;
+          }
+        }
+        endSpinSequence(); return;
+      }
+
+      winningSymbols.sort((a, b) => payTable[b] - payTable[a]);
+      let activeSymbol = winningSymbols[0];
+
+      let tumbleWin = 0; let count = symbolCounts[activeSymbol];
+      let cashWin = count * payTable[activeSymbol] * betAmount; tumbleWin += cashWin;
+      let triggeredBonus = false; let retriggeredBonus = false;
+      
+      if (activeSymbol === '🍭') {
+        if (inBonusRound) { freeSpins += 5; retriggeredBonus = true; updateUI(); } 
+        else { freeSpins += 10; triggeredBonus = true; inBonusRound = true; }
+      }
+
+      roundWin += tumbleWin; currentSpinWin += tumbleWin; balance += tumbleWin; updateUI();
+
+      if (triggeredBonus) {
+        playBonusSound();
+        if (bgMusic && bonusMusic) { bgMusic.pause(); bonusMusic.currentTime = 0; bonusMusic.play().catch(e=>console.log(e)); }
+        message.innerText = `🎉 ΜΠΗΚΕΣ ΣΤΟ BONUS! +10 FREE SPINS! 🎉`;
+        showPopup("🎉 ΜΠΗΚΕΣ ΣΤΟ BONUS! 🎉\n+10 FREE SPINS!", "bonus", 2500);
+      } else if (retriggeredBonus) {
+        playBonusSound();
+        message.innerText = `🔥 RETRIGGER! +5 Νέα Spins (Σύνολο: ${freeSpins}) 🔥`;
+        message.classList.add('retrigger-alert');
+        showPopup(`🔥 RETRIGGER! 🔥\n+5 Spins (Σύνολο: ${freeSpins})`, "bonus", 2500);
+      } else {
+        if (tumbleWin > 0) playCoinSound(); 
+        message.innerText = `⚡ ΣΚΑΕΙ: ${activeSymbol} x${count} (+${tumbleWin.toFixed(2)}€) ⚡`;
+      }
+
+      let winningIndices = [];
+      for (let i = 0; i < totalBoxes; i++) {
+        if (currentGrid[i] === activeSymbol) {
+          winningIndices.push(i);
+          if (activeSymbol === '🍭') { boxElements[i].classList.add('scatter-win'); } 
+          else { boxElements[i].classList.add('winner-box'); }
+        }
+      }
+
+      let delayBeforePop = (triggeredBonus || retriggeredBonus) ? 2500 : 1500;
+
+      setTimeout(() => {
+        if (isBonusTriggeredNow) {
+          boxElements.forEach(box => box.classList.remove('scatter-win'));
+          endSpinSequence();
+        } else {
+          playPopSound(); 
+          winningIndices.forEach(i => symElements[i].classList.add('pop'));
+          setTimeout(() => { applyGravityAndDrop(winningIndices); }, 400);
+        }
+      }, delayBeforePop); 
+    }
+
+    function endSpinSequence() {
+      const message = document.getElementById('message');
+      if (freeSpins > 0) {
+        message.innerText = roundWin > 0 ? `Κέρδη Bonus μέχρι τώρα: ${roundWin.toFixed(2)}€` : "Μαγική Περιστροφή... ✨";
+        setTimeout(() => { isSpinning = false; spin(); }, 1500);
+      } else {
+        if (inBonusRound && bgMusic && bonusMusic) { bonusMusic.pause(); bgMusic.play().catch(e=>console.log(e)); }
+        message.innerText = roundWin > 0 ? `Τέλος! Συνολικό Κέρδος: ${roundWin.toFixed(2)}€` : "Δοκίμασε ξανά!";
+        isSpinning = false; inBonusRound = false; 
+        updateUI(); 
+      }
+    }
+
+    function applyGravityAndDrop(winningIndices) {
+      let fallingIndices = []; 
+      for (let col = 0; col < cols; col++) {
+        let remainingSymbols = []; let remainingOriginalIndices = []; 
+        for (let row = 0; row < rows; row++) {
+          let index = row * cols + col;
+          if (!winningIndices.includes(index)) { remainingSymbols.push(currentGrid[index]); remainingOriginalIndices.push(index); }
+        }
+        let needed = rows - remainingSymbols.length; let newSymbols = []; let newOriginalIndices = [];
+        for (let i = 0; i < needed; i++) { newSymbols.push(getRandomSymbol(currentGrid)); newOriginalIndices.push(-1); }
+        let finalColumn = newSymbols.concat(remainingSymbols); let finalOriginalIndices = newOriginalIndices.concat(remainingOriginalIndices);
+        for (let row = 0; row < rows; row++) {
+          let index = row * cols + col; currentGrid[index] = finalColumn[row];
+          if (finalOriginalIndices[row] !== index) { fallingIndices.push(index); }
+        }
+      }
+      for (let i = 0; i < totalBoxes; i++) {
+        boxElements[i].classList.remove('winner-box', 'scatter-win', 'multiplier-win');
+        symElements[i].classList.remove('pop', 'drop'); 
+        if (fallingIndices.includes(i)) { symElements[i].classList.add('drop'); }
+        setSymbolAppearance(symElements[i], currentGrid[i]);
+      }
+      setTimeout(() => { symElements.forEach(sym => sym.classList.remove('drop')); evaluateBoard(); }, 500);
+    }
+
+    // ΝΕΑ ΣΥΝΑΡΤΗΣΗ: Ξεκλειδώνει τον ήχο και ξεκινάει τη μουσική
+    function startGame() {
+      // 1. Ενεργοποιούμε τον κινητήρα των εφέ (Web Audio API)
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      
+      // 2. Παίζει ένα μικρό εισαγωγικό μπιπ
+      playTone(440, 'sine', 0.1, 0.05);
+      
+      // 3. Ξεκινάει αμέσως η χαλαρή μουσική υποβάθρου
+      if (bgMusic) {
+        bgMusic.play().catch(e => console.log("Δεν βρέθηκε το αρχείο base-music.mp3"));
+      }
+      
+      // 4. Εξαφανίζουμε την οθόνη έναρξης με ένα ωραίο fade-out εφέ
+      const startScreen = document.getElementById('startScreen');
+      startScreen.style.opacity = '0';
+      startScreen.style.visibility = 'hidden';
+    }
+    // --- ΕΛΕΓΧΟΣ ΟΘΟΝΗΣ (Page Visibility) ---
+    // Αντιλαμβάνεται πότε ο χρήστης κλείνει την οθόνη ή αλλάζει tab/εφαρμογή
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden) {
+        // 1. Η οθόνη έκλεισε -> Κάνουμε παύση στη μουσική
+        if (bgMusic) bgMusic.pause();
+        if (bonusMusic) bonusMusic.pause();
+      } else {
+        // 2. Η οθόνη άνοιξε ξανά -> Βλέπουμε ποιο τραγούδι πρέπει να συνεχίσει
+        const startScreen = document.getElementById('startScreen');
+        
+        // Ξεκινάμε τη μουσική ΜΟΝΟ αν ο παίκτης έχει περάσει την οθόνη έναρξης
+        if (startScreen && startScreen.style.visibility === 'hidden') {
+          if (inBonusRound && bonusMusic) {
+            bonusMusic.play().catch(e => console.log(e));
+          } else if (bgMusic && !inBonusRound) {
+            bgMusic.play().catch(e => console.log(e));
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
