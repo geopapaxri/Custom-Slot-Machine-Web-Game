@@ -1,6 +1,6 @@
 # Retro Slot Machine Web Game 🎰
 
-🎮 **[Play the game live here!](https://geopapaxri.github.io/Custom-Slot-Machine-Web-Game/slot-machine/)**
+🎮 **[Play the game live here!] [https://geopapaxri.github.io/Custom-Slot-Machine-Web-Game/](https://geopapaxri.github.io/Custom-Slot-Machine-Web-Game/)**
 
 ## Overview
 I built this custom, retro-themed slot machine web game **just for fun** in my free time! It was developed entirely using HTML, CSS, and vanilla JavaScript as a personal challenge to experiment with front-end development, UI design, and game logic without relying on external game engines or heavy frameworks.
